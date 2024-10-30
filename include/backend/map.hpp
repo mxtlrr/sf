@@ -4,17 +4,12 @@
 // #pragma once
 
 #include <iostream> // min
+#include <vector>   // ...
 #include <math.h>   // floor
-
 
 #include "blitz.hpp"
 
 namespace Map {
-  extern int ROOM1;
-  extern int ROOM2;
-  extern int ROOM2C;
-  extern int ROOM3;
-  extern int ROOM4;
 
   constexpr int MAP_WIDTH   = 18;
   constexpr int MAP_HEIGHT  = 18;
@@ -27,6 +22,8 @@ namespace Map {
   extern int room2cAmount[3];
   extern int room3Amount[3];
   extern int room4Amount[3];
+
+  extern std::vector<std::vector<std::string>> mapRoom;
 
 
   /* Functions */
@@ -41,6 +38,14 @@ namespace Map {
 
   void enrichRoom1s();
   void enrichRoom2c4s();
+
+  void defineRooms();
+  void createRooms();
+
+
+  void setRoom(std::string roomName, int type,
+    int pos, int min, int max);
+
 };
 
 #endif

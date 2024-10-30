@@ -1,11 +1,11 @@
 #include "backend/map.hpp"
 
+int ROOM1  = 1;
+int ROOM2  = 2;
+int ROOM2C = 3;
+int ROOM3  = 4;
+int ROOM4  = 5;
 namespace Map {
-  int ROOM1  = 1;
-  int ROOM2  = 2;
-  int ROOM2C = 3;
-  int ROOM3  = 4;
-  int ROOM4  = 5;
 
   int mapTemp[MAP_WIDTH+1][MAP_HEIGHT+1];
   int room1Amount[3];
@@ -13,6 +13,8 @@ namespace Map {
   int room2cAmount[3];
   int room3Amount[3];
   int room4Amount[3];
+
+  std::vector<std::vector<std::string>> mapRoom;
 };
 
 
@@ -23,9 +25,14 @@ void Map::createMap(int seed){
   enrichRoom1s();
   enrichRoom2c4s();
 
-  std::string mapRoom[Map::ROOM4+1][room2Amount[0]+room2Amount[1]+room2Amount[2]+3];
-  std::cout << room2Amount[0]+room2Amount[1]+room2Amount[2]+3 << std::endl;
+  // Generate bounds for both dimensions.
+  std::vector<std::vector<std::string>> mapRoom(
+    ROOM4 + 1,
+    std::vector<std::string>(room2Amount[0] + room2Amount[1] + room2Amount[2] + 3)
+  );
 
+  defineRooms();
+  // createRooms();
 }
 
 void Map::countRooms(){
@@ -290,5 +297,127 @@ void Map::enrichRoom2c4s(){
         if(placed) break;
       }
     }
+  }
+}
+
+///////////////////////////////////////// room generation
+void Map::defineRooms(){
+  int minPos = 1;
+  int maxPos = room1Amount[0] - 1;
+
+  printf("minPos = %d | maxPos = %d\n", minPos, maxPos);
+
+
+  // generating out of range... weird...
+  mapRoom.at(ROOM1).at(0) = "start";
+  
+  
+  return;
+
+
+
+  setRoom("roompj", ROOM1, (int)(floor(0.1 * room1Amount[0])), minPos, maxPos);
+  setRoom("914", ROOM1, (int)(floor(0.3 * room1Amount[0])), minPos, maxPos);
+  setRoom("room1archive", ROOM1, (int)(floor(0.5 * room1Amount[0])), minPos, maxPos);
+  setRoom("room205", ROOM1, (int)(floor(0.6 * room1Amount[0])), minPos, maxPos);
+
+  mapRoom[ROOM2C][0] = "lockroom";
+
+  maxPos = room2Amount[0] - 1;
+
+  mapRoom[ROOM2][0] = "room2closets";
+  setRoom("room2testroom2", ROOM2, (int)(floor(0.1 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2scps", ROOM2, (int)(floor(0.2 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2storage", ROOM2, (int)(floor(0.3 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2gw_b", ROOM2, (int)(floor(0.4 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2sl", ROOM2, (int)(floor(0.5 * room2Amount[0])), minPos, maxPos);
+  setRoom("room012", ROOM2, (int)(floor(0.55 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2scps2", ROOM2, (int)(floor(0.6 * room2Amount[0])), minPos, maxPos);
+  setRoom("room1123", ROOM2, (int)(floor(0.7 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2elevator", ROOM2, (int)(floor(0.85 * room2Amount[0])), minPos, maxPos);
+
+  mapRoom[ROOM3][(int)floor(bbRnd(0.2f, 0.8f) * room3Amount[0])] = "room3storage";
+
+  mapRoom[ROOM2C][(int)floor(0.5 * room2cAmount[0])] = "room1162";
+
+  mapRoom[ROOM4][(int)floor(0.3 * room4Amount[0])] = "room4info";
+
+  // zone 2
+  minPos = room1Amount[0];
+  maxPos = minPos + room1Amount[1] - 1;
+
+  setRoom("room079", ROOM1, room1Amount[0] + (int)(floor(0.15 * room1Amount[1])), minPos, maxPos);
+  setRoom("room106", ROOM1, room1Amount[0] + (int)(floor(0.3 * room1Amount[1])), minPos, maxPos);
+  setRoom("008", ROOM1, room1Amount[0] + (int)(floor(0.4 * room1Amount[1])), minPos, maxPos);
+  setRoom("room035", ROOM1, room1Amount[0] + (int)(floor(0.5 * room1Amount[1])), minPos, maxPos);
+  setRoom("coffin", ROOM1, room1Amount[0] + (int)(floor(0.7 * room1Amount[1])), minPos, maxPos);
+
+  minPos = room2Amount[0];
+  maxPos = minPos + room2Amount[1] - 1;
+
+  mapRoom[ROOM2][minPos + (int)(floor(0.1 * room2Amount[1]))] = "room2nuke";
+  setRoom("room2tunnel", ROOM2, minPos + (int)(floor(0.25 * room2Amount[1])), minPos, maxPos);
+  setRoom("room049", ROOM2, minPos + (int)(floor(0.4 * room2Amount[1])), minPos, maxPos);
+  setRoom("room2shaft", ROOM2, minPos + (int)(floor(0.6 * room2Amount[1])), minPos, maxPos);
+  setRoom("testroom", ROOM2, minPos + (int)(floor(0.7 * room2Amount[1])), minPos, maxPos);
+  setRoom("room2servers", ROOM2, minPos + (int)(floor(0.9 * room2Amount[1])), minPos, maxPos);
+
+  mapRoom[ROOM3][room3Amount[0] + (int)floor(0.3 * room3Amount[1])] = "room513";
+  mapRoom[ROOM3][room3Amount[0] + (int)floor(0.6 * room3Amount[1])] = "room966";
+
+  mapRoom[ROOM2C][room2cAmount[0] + (int)floor(0.5 * room2cAmount[1])] = "room2cpit";
+
+  // zone 3
+  mapRoom[ROOM1][room1Amount[0] + room1Amount[1] + room1Amount[2] - 2] = "exit1";
+  mapRoom[ROOM1][room1Amount[0] + room1Amount[1] + room1Amount[2] - 1] = "gateaentrance";
+  mapRoom[ROOM1][room1Amount[0] + room1Amount[1]] = "room1lifts";
+
+  minPos = room2Amount[0] + room2Amount[1];
+  maxPos = minPos + room2Amount[2] - 1;
+
+  mapRoom[ROOM2][minPos + (int)(floor(0.1 * room2Amount[2]))] = "room2poffices";
+  setRoom("room2cafeteria", ROOM2, minPos + (int)(floor(0.2 * room2Amount[2])), minPos, maxPos);
+  setRoom("room2sroom", ROOM2, minPos + (int)(floor(0.3 * room2Amount[2])), minPos, maxPos);
+  setRoom("room2servers2", ROOM2, minPos + (int)(floor(0.4 * room2Amount[2])), minPos, maxPos);
+  setRoom("room2offices", ROOM2, minPos + (int)(floor(0.45 * room2Amount[2])), minPos, maxPos);
+  setRoom("room2offices4", ROOM2, minPos + (int)(floor(0.5 * room2Amount[2])), minPos, maxPos);
+  setRoom("room860", ROOM2, minPos + (int)(floor(0.6 * room2Amount[2])), minPos, maxPos);
+  setRoom("medibay", ROOM2, minPos + (int)(floor(0.7 * room2Amount[2])), minPos, maxPos);
+  setRoom("room2poffices2", ROOM2, minPos + (int)(floor(0.8 * room2Amount[2])), minPos, maxPos);
+  setRoom("room2offices2", ROOM2, minPos + (int)(floor(0.9 * room2Amount[2])), minPos, maxPos);
+
+  int r2c = room2cAmount[0] + room2cAmount[1];
+  mapRoom[ROOM2C][r2c] = "room2ccont";
+  mapRoom[ROOM2C][r2c + 1] = "lockroom2";
+
+  int r3 = room3Amount[0] + room3Amount[1];
+  mapRoom[ROOM3][r3 + (int)(floor(0.3 * room3Amount[2]))] = "room3servers";
+  mapRoom[ROOM3][r3 + (int)(floor(0.7 * room3Amount[2]))] = "room3servers2";
+  mapRoom[ROOM3][r3 + (int)(floor(0.5 * room3Amount[2]))] = "room3offices";
+}
+
+void Map::setRoom(std::string roomName, int type, int pos, int min, int max){
+  std::cout << "setRoom() call. name: " << roomName << "\n";
+  bool looped = false;
+  bool canPlace = true;
+  while(Map::mapRoom[type][pos] != ""){
+    pos++;
+    if(pos > max){
+      if(!looped){
+        pos = min + 1;
+        looped = true;
+      } else {
+        canPlace = false;
+        break;
+      }
+    }
+  }
+
+  printf("%s // pos: %.3d...", roomName.c_str(), pos);
+  if(canPlace){
+    Map::mapRoom[type][pos] = roomName;
+    printf("placed!\n");
+  } else {
+    printf("failed to be placed!\n");
   }
 }
