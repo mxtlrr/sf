@@ -26,10 +26,10 @@ void Map::createMap(int seed){
   enrichRoom2c4s();
 
   // Generate bounds for both dimensions.
-  std::vector<std::vector<std::string>> mapRoom(
+  mapRoom = std::vector<std::vector<std::string>>(
     ROOM4 + 1,
     std::vector<std::string>(room2Amount[0] + room2Amount[1] + room2Amount[2] + 3)
-  );
+);
 
   defineRooms();
   // createRooms();
@@ -39,28 +39,30 @@ void Map::countRooms(){
   int zone;
   for(int y = 1; y <= Map::MAP_HEIGHT; y++){
     zone = Map::getZone(y);
+
     for(int x = 1; x <= Map::MAP_WIDTH - 1; x++){
+    printf("mapTemp --> %d\n", mapTemp[x][y]);
       if (mapTemp[x][y] > 0) {
         if (mapTemp[x][y] < 255){
           mapTemp[x][y] = Map::getConnections(mapTemp, x, y);
-          switch (mapTemp[x][y]) {
-            case 1:
-              room1Amount[zone]++;
-              break;
-            case 2:
-              if (Map::getHorizontalConnections(mapTemp, x, y) == 2)
-                room2Amount[zone]++;
-              else if (Map::getVerticalConnections(mapTemp, x, y) == 2)
-                room2Amount[zone]++;
-              else room2cAmount[zone]++;
-              break;
-            case 3:
-              room3Amount[zone]++;
-              break;
-            case 4:
-              room4Amount[zone]++;
-              break;
-          }
+        }
+        switch (mapTemp[x][y]) {
+          case 1:
+            room1Amount[zone]++;
+            break;
+          case 2:
+            if (Map::getHorizontalConnections(mapTemp, x, y) == 2)
+              room2Amount[zone]++;
+            else if (Map::getVerticalConnections(mapTemp, x, y) == 2)
+              room2Amount[zone]++;
+            else room2cAmount[zone]++;
+            break;
+          case 3:
+            room3Amount[zone]++;
+            break;
+          case 4:
+            room4Amount[zone]++;
+            break;
         }
       }
     }
@@ -93,6 +95,7 @@ int Map::getConnections(int map[][19], int x, int y){
 ////////// actual spaghetti code!
 
 void Map::enrichRoom1s(){
+  printf("enrichRoom1s() call\n");
   int x2=0; int y2=0; int roomsLeft;
   for(int i = 0; i <= 2; i++){
     roomsLeft = 5 - room1Amount[i];
@@ -156,6 +159,11 @@ void Map::enrichRoom1s(){
       }
     }
   }
+  printf("room1Amount[i] = 0..3:\n| ");
+  for(int z : room1Amount){
+    printf("%d | ", z);
+  }
+  printf("\n");
 }
 
 void Map::enrichRoom2c4s(){
@@ -309,12 +317,7 @@ void Map::defineRooms(){
 
 
   // generating out of range... weird...
-  mapRoom.at(ROOM1).at(0) = "start";
-  
-  
-  return;
-
-
+  mapRoom[ROOM1][0] = "start"; 
 
   setRoom("roompj", ROOM1, (int)(floor(0.1 * room1Amount[0])), minPos, maxPos);
   setRoom("914", ROOM1, (int)(floor(0.3 * room1Amount[0])), minPos, maxPos);
@@ -413,11 +416,14 @@ void Map::setRoom(std::string roomName, int type, int pos, int min, int max){
     }
   }
 
-  printf("%s // pos: %.3d...", roomName.c_str(), pos);
+  printf("\t%s // pos: %d...", roomName.c_str(), pos);
   if(canPlace){
     Map::mapRoom[type][pos] = roomName;
     printf("placed!\n");
   } else {
     printf("failed to be placed!\n");
+    printf("Pos: %d | Min: %d | Max: %d | Type: %d\n\n",
+    pos,min,max,type);
+    exit(1);
   }
 }
