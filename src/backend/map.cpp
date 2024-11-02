@@ -22,112 +22,110 @@ namespace Map {
 	std::vector<Room> rooms;
 };
 
-void Map::createRooms(){
-  int zone, connections;
-	int mapRoomID[ROOM4+1];
 
-	Room r;
-	for(int y = Map::MAP_HEIGHT - 1; y >= 1; y--){
-		if(y < Map::MAP_HEIGHT/3+1) zone = 3;
-		else if(y < Map::MAP_HEIGHT*(2.0f/3.0f)) zone = 2;
-		else zone = 1;
+// Map::createRooms () at /usr/include/c++/14.2.1/bits/basic_string.h:1076
+// 1076          size() const _GLIBCXX_NOEXCEPT
+// in this function
+void Map::createRooms() {
+    int zone, connections;
+    int mapRoomID[ROOM4 + 1] = {0}; // Initialize mapRoomID array to 0
 
-		for(int x = 1; x <= Map::MAP_WIDTH-2; x++){
-			connections = getConnections(mapTemp, x, y);
-			if(mapTemp[x][y] == 255){
-				// checkpoint rooms
-				int type = connections == 2 ? ROOM2 : ROOM1;
-				if(y > Map::MAP_HEIGHT/2) r = Room::createRoom(zone, type, x*8,
-																							y*8, "checkpoint1");  // zone=2
-				else r = Room::createRoom(zone,type,x*8,y*8,"checkpoint2"); // zone=3
-			} else if(mapTemp[x][y] > 0){
-				std::string mapName;
-				switch(connections){
-					case 1:
-						if(!(mapRoom[ROOM1][mapRoomID[ROOM1]].empty()))
-							mapName = mapRoom[ROOM1][mapRoomID[ROOM1]];
-						
-						r = Room::createRoom(zone, ROOM1, x*8, y*8, mapName);
-						if(mapTemp[x][y+1] > 0) r.angle = 180;
-						else if(mapTemp[x-1][y] > 0) r.angle = 270;
-						else if(mapTemp[x+1][y] > 0) r.angle = 90;
-						else r.angle = 0;
-						mapRoomID[ROOM1]++;
-						break;
+    Room r;
+    for (int y = Map::MAP_HEIGHT - 1; y >= 1; y--) {
+        if (y < Map::MAP_HEIGHT / 3 + 1) 
+            zone = 3;
+        else if (y < Map::MAP_HEIGHT * (2.0f / 3.0f)) 
+            zone = 2;
+        else 
+            zone = 1;
 
-					case 2:
-						if(getHorizontalConnections(mapTemp,x,y) == 2){
-							if(mapRoom[ROOM2][mapRoomID[ROOM2]].empty() != true) mapName=mapRoom[ROOM2][mapRoomID[ROOM2]];
-							r = Room::createRoom(zone, ROOM2, x*8, y*8, mapName);
-							if(bbRand(1,2) == 1) r.angle = 90;
-							else r.angle = 270;
-							mapRoomID[ROOM2]++;
-						} else if(getVerticalConnections(mapTemp,x,y) == 2){
-							if(mapRoom[ROOM2][mapRoomID[ROOM2]].empty() != true) // != null
-								mapName = mapRoom[ROOM2][mapRoomID[ROOM2]];
-							
-							r = Room::createRoom(zone, ROOM2, x*8, y*8, mapName);
-							if(bbRand(1,2) == 1) r.angle = 180;
-							else r.angle = 0;
-							mapRoomID[ROOM2]++;
-						} else {
-							if(mapRoom[ROOM2C][mapRoomID[ROOM2C]].empty() != true)
-								mapName = mapRoom[ROOM2C][mapRoomID[ROOM2C]];
-							
-							if(mapTemp[x-1][y] > 0 && mapTemp[x][y+1] > 0){
-								r = Room::createRoom(zone, ROOM2C, x*8,y*8, mapName);
-								r.angle = 180;
-							}else if(mapTemp[x+1][y] > 0 && mapTemp[x][y+1] > 0){
-								r = Room::createRoom(zone, ROOM2C, x*8, y*8, mapName);
-								r.angle =  90;
-							}else if(mapTemp[x-1][y] > 0 && mapTemp[x][y-1] > 0){
-								r = Room::createRoom(zone, ROOM2C, x*8, y*8, mapName);
-								r.angle = 270;
-							}else r = Room::createRoom(zone, ROOM2C, x*8, y*8, mapName);
-							mapRoomID[ROOM2C]++;
-						}
-						break;
+        for (int x = 1; x <= Map::MAP_WIDTH - 2; x++) {
+            connections = getConnections(mapTemp, x, y);
+            r = Room();  // Reset Room r for each iteration to avoid stale data
+            
+            if (mapTemp[x][y] == 255) {
+                // checkpoint rooms
+                int type = (connections == 2) ? ROOM2 : ROOM1;
+                if (y > Map::MAP_HEIGHT / 2) 
+                    r = Room::createRoom(zone, type, x * 8, y * 8, "checkpoint1");  // zone=2
+                else 
+                    r = Room::createRoom(zone, type, x * 8, y * 8, "checkpoint2");  // zone=3
+            } else if (mapTemp[x][y] > 0) {
+                std::string mapName = "";
+                switch (connections) {
+                    case 1:
+                        if ((size_t)mapRoomID[ROOM1] < mapRoom[ROOM1].size()) {
+                            mapName = mapRoom[ROOM1][mapRoomID[ROOM1]];
+                            mapRoomID[ROOM1]++;
+                        }
+                        r = Room::createRoom(zone, ROOM1, x * 8, y * 8, mapName);
+                        if (mapTemp[x][y + 1] > 0) r.angle = 180;
+                        else if (mapTemp[x - 1][y] > 0) r.angle = 270;
+                        else if (mapTemp[x + 1][y] > 0) r.angle = 90;
+                        break;
 
-					case 3:
-						if(mapRoom[ROOM3][mapRoomID[ROOM3]].empty() != true)
-							mapName = mapRoom[ROOM3][mapRoomID[ROOM3]];
+                    case 2:
+                        if (getHorizontalConnections(mapTemp, x, y) == 2) {
+                            if ((size_t)mapRoomID[ROOM2] < mapRoom[ROOM2].size()) {
+                                mapName = mapRoom[ROOM2][mapRoomID[ROOM2]];
+                                mapRoomID[ROOM2]++;
+                            }
+                            r = Room::createRoom(zone, ROOM2, x * 8, y * 8, mapName);
+                            r.angle = (bbRand(1, 2) == 1) ? 90 : 270;
+                        } else if (getVerticalConnections(mapTemp, x, y) == 2) {
+                            if ((size_t)mapRoomID[ROOM2] < mapRoom[ROOM2].size()) {
+                                mapName = mapRoom[ROOM2][mapRoomID[ROOM2]];
+                                mapRoomID[ROOM2]++;
+                            }
+                            r = Room::createRoom(zone, ROOM2, x * 8, y * 8, mapName);
+                            r.angle = (bbRand(1, 2) == 1) ? 180 : 0;
+                        } else {
+                            if ((size_t)mapRoomID[ROOM2C] < mapRoom[ROOM2C].size()) {
+                                mapName = mapRoom[ROOM2C][mapRoomID[ROOM2C]];
+                                mapRoomID[ROOM2C]++;
+                            }
+                            if (mapTemp[x - 1][y] > 0 && mapTemp[x][y + 1] > 0) {
+                                r = Room::createRoom(zone, ROOM2C, x * 8, y * 8, mapName);
+                                r.angle = 180;
+                            } else if (mapTemp[x + 1][y] > 0 && mapTemp[x][y + 1] > 0) {
+                                r = Room::createRoom(zone, ROOM2C, x * 8, y * 8, mapName);
+                                r.angle = 90;
+                            } else if (mapTemp[x - 1][y] > 0 && mapTemp[x][y - 1] > 0) {
+                                r = Room::createRoom(zone, ROOM2C, x * 8, y * 8, mapName);
+                                r.angle = 270;
+                            }
+                        }
+                        break;
 
-						r = Room::createRoom(zone, ROOM3, x*8, y*8, mapName);
-						if(mapTemp[x][y-1] == 0) r.angle = 180;
-						else if(mapTemp[x-1][y] == 0) r.angle = 90;
-						else if(mapTemp[x+1][y] == 0) r.angle = 270;
+                    case 3:
+                        if ((size_t)mapRoomID[ROOM3] < mapRoom[ROOM3].size()) {
+                            mapName = mapRoom[ROOM3][mapRoomID[ROOM3]];
+                            mapRoomID[ROOM3]++;
+                        }
+                        r = Room::createRoom(zone, ROOM3, x * 8, y * 8, mapName);
+                        if (mapTemp[x][y - 1] == 0) r.angle = 180;
+                        else if (mapTemp[x - 1][y] == 0) r.angle = 90;
+                        else if (mapTemp[x + 1][y] == 0) r.angle = 270;
+                        break;
 
-						mapRoomID[ROOM3]++;
-						break;
+                    case 4:
+                        if ((size_t)mapRoomID[ROOM4] < mapRoom[ROOM4].size()) {
+                            mapName = mapRoom[ROOM4][mapRoomID[ROOM4]];
+                            mapRoomID[ROOM4]++;
+                        }
+                        r = Room::createRoom(zone, ROOM4, x * 8, y * 8, mapName);
+                        break;
+                }
+            }
 
-					case 4:
-						if(mapRoom[ROOM4][mapRoomID[ROOM4]].empty() != true)
-							mapName = mapRoom[ROOM3][mapRoomID[ROOM4]];
-						r = Room::createRoom(zone, ROOM4, x*8, y*8, mapName);
-						mapRoomID[ROOM4]++;
-						break;
-				}
-			}
-
-			// Only push back if:
-			//	1. is valid
-			// 	2. no duplicates
-			if(validRoom(r) == true){
-				printf("Hi. rooms size ->%ld\n", rooms.size());
-				rooms.push_back(r);
-			// 	#ifdef DEBUG
-			// 		printf("Added a new room! :)\n");
-			// 	#endif
-			} else {
-				printf("Invalid room! Name: '%s', Pos: (%.2f, %.2f)\n",
-						r.rt.name.c_str(), r.x, r.z);
-			}
-		}
-	}
-
-	// don't add 1499 -- too much overlap bullshit. not needed
-	// TODO? i dunno.
+            // Only push back if the room is valid and unique
+            if (validRoom(r)) {
+                rooms.push_back(r);
+            }
+        }
+    }
 }
+
 
 
 void Map::createMap(int seed){
@@ -587,4 +585,10 @@ void Map::setRoom(std::string roomName, int type, int pos, int min, int max){
 
 void clearVector(){
   Map::rooms.clear();
+	// Map::mapRoom.clear();
+	for(int i=0;i<=18;i++){
+		for(int j=0;j<=18;j++){
+			Map::mapTemp[i][j] = 0;
+		}
+	}
 }

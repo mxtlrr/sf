@@ -19,10 +19,11 @@ Room Room::createRoom(int zone, int shape, int x, int z, std::string name) {
 }
 
 bool validRoom(Room r){
-  if((r.zone > 0 && r.shape > 0 && r.x >= 0 &&
-      r.z >= 0) && r.rt.name.empty() == false)
-    return true;
-  return false;
+  return !(r.rt.name.empty());
+  // if(r.rt.name.empty() == false){
+    // return true;
+  // }
+  // return false;
 }
 
 bool existRooms(std::vector<Room> r, Room n){
