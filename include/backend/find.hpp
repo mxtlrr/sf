@@ -8,6 +8,7 @@
 
 #include "backend/map.hpp"
 #include "backend/room.hpp"
+#include "util.hpp"
 
 // Upper limit -- how many seeds to check.
 // Obviously this will increase. The plan is to check *all*
@@ -15,7 +16,7 @@
 // seeds) is quite good for testing patterns.
 // TODO: up this amount when code actually works! 2^25 is 1.5%
 // of all seeds.
-#define LIMIT 1000
+#define LIMIT 10
 
 
 class SeedResults  {

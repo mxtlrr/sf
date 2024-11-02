@@ -113,10 +113,14 @@ void Map::createRooms(){
 			//	1. is valid
 			// 	2. no duplicates
 			if(validRoom(r) == true){
+				printf("Hi. rooms size ->%ld\n", rooms.size());
 				rooms.push_back(r);
-				#ifdef DEBUG
-					printf("Added a new room! :)\n");
-				#endif
+			// 	#ifdef DEBUG
+			// 		printf("Added a new room! :)\n");
+			// 	#endif
+			} else {
+				printf("Invalid room! Name: '%s', Pos: (%.2f, %.2f)\n",
+						r.rt.name.c_str(), r.x, r.z);
 			}
 		}
 	}
