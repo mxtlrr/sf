@@ -579,3 +579,8 @@ void Map::setRoom(std::string roomName, int type, int pos, int min, int max){
   }
   if (canPlace) mapRoom[type][pos] = roomName;
 }
+
+
+void clearVector(){
+  Map::rooms.clear();
+}

@@ -18,10 +18,21 @@
 #define LIMIT 1000
 
 
+class SeedResults  {
+  public:
+    int seedId;
+    float accuracy;
+};
+
 /* Finds a seed based on a pattern of rooms. How it works:
  * 1. Generates a seed
  * 2. Checks each room in pattern. If found, increases a counter.
- * Return value is the accuracy. 1.0f means exact match found. */
-float patternFind(std::vector<Room> pattern);
+ * Return value:
+ *    SeedResults vector. Each element has two items, seedId and accuracy.
+ *      i.  seedId   -- the seed itself 
+ *      ii. accuracy -- the accuracy of the seed having said pattern
+ *                (1.0f -- it exists and is exact, 0.0f -- doesn't exist)
+ *                 caluclated by (roomsFound/roomsInPattern)*/
+std::vector<SeedResults> patternFind(std::vector<Room> pattern);
 
 #endif

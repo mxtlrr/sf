@@ -50,4 +50,9 @@ namespace Map {
 
 };
 
+// We don't want to add stuff to a seed that we've already
+// generated, so after we do our operations then we want to
+// clean it up.
+void clearVector();
+
 #endif
