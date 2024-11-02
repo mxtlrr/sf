@@ -32,9 +32,6 @@ class Room {
     // template?
     RoomTemplate rt;
 
-    double minX, minZ;
-    double maxX, maxZ;
-
     static Room createRoom(int zone, int shape, int x, int z, std::string name);
 
     // find() and some std::set things like std::set.insert
