@@ -5,9 +5,10 @@
 
 #include <iostream> // min
 #include <vector>   // ...
-#include <math.h>   // floor
+#include <math.h>   // floor, abs
 
-#include "blitz.hpp"
+#include "blitz.hpp" // bbRand / other stuff from the blitz engine
+#include "backend/room.hpp"
 
 namespace Map {
 
@@ -24,7 +25,7 @@ namespace Map {
   extern int room4Amount[3];
 
   extern std::vector<std::vector<std::string>> mapRoom;
-
+  extern std::vector<Room> rooms;
 
   /* Functions */
   void createMap(int seed);
@@ -40,6 +41,7 @@ namespace Map {
   void enrichRoom2c4s();
 
   void defineRooms();
+  void generateMaze();
   void createRooms();
 
 

@@ -18,9 +18,9 @@ work.
 
 # TODO
 - [ ] Finish porting SCP:CB's map gen
-  - [ ] Generate more than zone 1
-    - [ ] zone 2 (HCZ)
-    - [ ] zone 3 (EZ)
+  - [X] Generate more than zone 1
+    - [X] zone 2 (HCZ)
+    - [X] zone 3 (EZ)
     - [ ] Gate A / Gate B (doesn't really matter)
   - [ ] Potentially optimize to make it faster?
 - [ ] Make a GUI to make the zone
@@ -29,3 +29,12 @@ work.
   disk space as possible
 
 Other stuff TBA.
+
+# Source Credit
+
+The original port from BlitzBasic to Java was done by Sooslick
+[here](https://github.com/Sooslick/scpcbUtility). The original
+BlitzBasic source can be found [here](https://github.com/Regalis11/scpcb).
+
+Do be warned, the source code is a mess! *Also blitzbasic is kinda
+ass lol*

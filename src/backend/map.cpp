@@ -1,3 +1,7 @@
+/* WARNING! THIS CODE IS A FUCKING MESS! IT IS A C++ PORT OF 
+ * JAVA CODE, WHICH, IN TURN IS A PORT OF BLITZ BASIC CODE.
+ * I DO NOT FULLY UNDERSTAND WHAT'S GOING ON HERE. */
+
 #include "backend/map.hpp"
 
 int ROOM1  = 1;
@@ -15,24 +19,131 @@ namespace Map {
   int room4Amount[3];
 
   std::vector<std::vector<std::string>> mapRoom;
+	std::vector<Room> rooms;
 };
+
+void Map::createRooms(){
+  int zone, connections;
+	int mapRoomID[ROOM4+1];
+
+	Room r;
+	for(int y = Map::MAP_HEIGHT - 1; y >= 1; y--){
+		if(y < Map::MAP_HEIGHT/3+1) zone = 3;
+		else if(y < Map::MAP_HEIGHT*(2.0f/3.0f)) zone = 2;
+		else zone = 1;
+
+		for(int x = 1; x <= Map::MAP_WIDTH-2; x++){
+			connections = getConnections(mapTemp, x, y);
+			if(mapTemp[x][y] == 255){
+				// checkpoint rooms
+				int type = connections == 2 ? ROOM2 : ROOM1;
+				if(y > Map::MAP_HEIGHT/2) r = Room::createRoom(zone, type, x*8,
+																							y*8, "checkpoint1");  // zone=2
+				else r = Room::createRoom(zone,type,x*8,y*8,"checkpoint2"); // zone=3
+			} else if(mapTemp[x][y] > 0){
+				std::string mapName;
+				switch(connections){
+					case 1:
+						if(!(mapRoom[ROOM1][mapRoomID[ROOM1]].empty()))
+							mapName = mapRoom[ROOM1][mapRoomID[ROOM1]];
+						
+						r = Room::createRoom(zone, ROOM1, x*8, y*8, mapName);
+						if(mapTemp[x][y+1] > 0) r.angle = 180;
+						else if(mapTemp[x-1][y] > 0) r.angle = 270;
+						else if(mapTemp[x+1][y] > 0) r.angle = 90;
+						else r.angle = 0;
+						mapRoomID[ROOM1]++;
+						break;
+
+					case 2:
+						if(getHorizontalConnections(mapTemp,x,y) == 2){
+							if(mapRoom[ROOM2][mapRoomID[ROOM2]].empty() != true) mapName=mapRoom[ROOM2][mapRoomID[ROOM2]];
+							r = Room::createRoom(zone, ROOM2, x*8, y*8, mapName);
+							if(bbRand(1,2) == 1) r.angle = 90;
+							else r.angle = 270;
+							mapRoomID[ROOM2]++;
+						} else if(getVerticalConnections(mapTemp,x,y) == 2){
+							if(mapRoom[ROOM2][mapRoomID[ROOM2]].empty() != true) // != null
+								mapName = mapRoom[ROOM2][mapRoomID[ROOM2]];
+							
+							r = Room::createRoom(zone, ROOM2, x*8, y*8, mapName);
+							if(bbRand(1,2) == 1) r.angle = 180;
+							else r.angle = 0;
+							mapRoomID[ROOM2]++;
+						} else {
+							if(mapRoom[ROOM2C][mapRoomID[ROOM2C]].empty() != true)
+								mapName = mapRoom[ROOM2C][mapRoomID[ROOM2C]];
+							
+							if(mapTemp[x-1][y] > 0 && mapTemp[x][y+1] > 0){
+								r = Room::createRoom(zone, ROOM2C, x*8,y*8, mapName);
+								r.angle = 180;
+							}else if(mapTemp[x+1][y] > 0 && mapTemp[x][y+1] > 0){
+								r = Room::createRoom(zone, ROOM2C, x*8, y*8, mapName);
+								r.angle =  90;
+							}else if(mapTemp[x-1][y] > 0 && mapTemp[x][y-1] > 0){
+								r = Room::createRoom(zone, ROOM2C, x*8, y*8, mapName);
+								r.angle = 270;
+							}else r = Room::createRoom(zone, ROOM2C, x*8, y*8, mapName);
+							mapRoomID[ROOM2C]++;
+						}
+						break;
+
+					case 3:
+						if(mapRoom[ROOM3][mapRoomID[ROOM3]].empty() != true)
+							mapName = mapRoom[ROOM3][mapRoomID[ROOM3]];
+
+						r = Room::createRoom(zone, ROOM3, x*8, y*8, mapName);
+						if(mapTemp[x][y-1] == 0) r.angle = 180;
+						else if(mapTemp[x-1][y] == 0) r.angle = 90;
+						else if(mapTemp[x+1][y] == 0) r.angle = 270;
+
+						mapRoomID[ROOM3]++;
+						break;
+
+					case 4:
+						if(mapRoom[ROOM4][mapRoomID[ROOM4]].empty() != true)
+							mapName = mapRoom[ROOM3][mapRoomID[ROOM4]];
+						r = Room::createRoom(zone, ROOM4, x*8, y*8, mapName);
+						mapRoomID[ROOM4]++;
+						break;
+				}
+			}
+
+			// Only push back if:
+			//	1. is valid
+			// 	2. no duplicates
+			if(validRoom(r) == true){
+				rooms.push_back(r);
+				#ifdef DEBUG
+					printf("Added a new room! :)\n");
+				#endif
+			}
+		}
+	}
+
+	// don't add 1499 -- too much overlap bullshit. not needed
+	// TODO? i dunno.
+}
 
 
 void Map::createMap(int seed){
   bbSeedRnd(seed);
+	generateMaze();
   countRooms();
 
   enrichRoom1s();
   enrichRoom2c4s();
 
-  // Generate bounds for both dimensions.
+  // Generate bounds for both dimensions. This is yuck code but there's
+	// not really any other place to put it.
   mapRoom = std::vector<std::vector<std::string>>(
     ROOM4 + 1,
-    std::vector<std::string>(room2Amount[0] + room2Amount[1] + room2Amount[2] + 3)
-);
+    std::vector<std::string>(room2Amount[0] + room2Amount[1] + room2Amount[2] + 3));
 
   defineRooms();
-  // createRooms();
+  createRooms();
+
+	// Map finished generating!!
 }
 
 void Map::countRooms(){
@@ -95,7 +206,6 @@ int Map::getConnections(int map[][19], int x, int y){
 ////////// actual spaghetti code!
 
 void Map::enrichRoom1s(){
-  printf("enrichRoom1s() call\n");
   int x2 = 0, y2 = 0, roomsLeft;
 
   // force more room1s (if needed) for each zone
@@ -315,35 +425,142 @@ void Map::defineRooms(){
   int maxPos = room1Amount[0] - 1;
 
   mapRoom[ROOM1][0] = "start";
-  setRoom("roompj", ROOM1, (int) (floor(0.1 * room1Amount[0])), minPos, maxPos);
-  setRoom("914", ROOM1, (int) (floor(0.3 * room1Amount[0])), minPos, maxPos);
-  setRoom("room1archive", ROOM1, (int) (floor(0.5 * room1Amount[0])), minPos, maxPos);
-  setRoom("room205", ROOM1, (int) (floor(0.6 * room1Amount[0])), minPos, maxPos);
+  setRoom("roompj", ROOM1, (int)(floor(0.1 * room1Amount[0])), minPos, maxPos);
+  setRoom("914", ROOM1, (int)(floor(0.3 * room1Amount[0])), minPos, maxPos);
+  setRoom("room1archive", ROOM1, (int)(floor(0.5 * room1Amount[0])), minPos, maxPos);
+  setRoom("room205", ROOM1, (int)(floor(0.6 * room1Amount[0])), minPos, maxPos);
 
   mapRoom[ROOM2C][0] = "lockroom";
 
   maxPos = room2Amount[0] - 1;
 
   mapRoom[ROOM2][0] = "room2closets";
-  setRoom("room2testroom2", ROOM2, (int) (floor(0.1 * room2Amount[0])), minPos, maxPos);
-  setRoom("room2scps", ROOM2, (int) (floor(0.2 * room2Amount[0])), minPos, maxPos);
-  setRoom("room2storage", ROOM2, (int) (floor(0.3 * room2Amount[0])), minPos, maxPos);
-  setRoom("room2gw_b", ROOM2, (int) (floor(0.4 * room2Amount[0])), minPos, maxPos);
-  setRoom("room2sl", ROOM2, (int) (floor(0.5 * room2Amount[0])), minPos, maxPos);
-  setRoom("room012", ROOM2, (int) (floor(0.55 * room2Amount[0])), minPos, maxPos);
-  setRoom("room2scps2", ROOM2, (int) (floor(0.6 * room2Amount[0])), minPos, maxPos);
-  setRoom("room1123", ROOM2, (int) (floor(0.7 * room2Amount[0])), minPos, maxPos);
-  setRoom("room2elevator", ROOM2, (int) (floor(0.85 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2testroom2", ROOM2, (int)(floor(0.1 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2scps", ROOM2, (int)(floor(0.2 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2storage", ROOM2, (int)(floor(0.3 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2gw_b", ROOM2, (int)(floor(0.4 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2sl", ROOM2, (int)(floor(0.5 * room2Amount[0])), minPos, maxPos);
+  setRoom("room012", ROOM2, (int)(floor(0.55 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2scps2", ROOM2, (int)(floor(0.6 * room2Amount[0])), minPos, maxPos);
+  setRoom("room1123", ROOM2, (int)(floor(0.7 * room2Amount[0])), minPos, maxPos);
+  setRoom("room2elevator", ROOM2, (int)(floor(0.85 * room2Amount[0])), minPos, maxPos);
 
-  mapRoom[ROOM3][(int) floor(bbRnd(0.2f, 0.8f) * room3Amount[0])] = "room3storage";
-  mapRoom[ROOM2C][(int) floor(0.5 * room2cAmount[0])] = "room1162";
+  mapRoom[ROOM3][(int)floor(bbRnd(0.2f, 0.8f) * room3Amount[0])] = "room3storage";
+
+  mapRoom[ROOM2C][(int)floor(0.5 * room2cAmount[0])] = "room1162";
+
   mapRoom[ROOM4][(int)floor(0.3 * room4Amount[0])] = "room4info";
 
-  printf("zone 1 done!\n");
+  // zone 2
+  minPos = room1Amount[0];
+  maxPos = minPos + room1Amount[1] - 1;
 
-  // TODO: generate zone 2 and 3...
-  // currently they segfault (bad)
+  setRoom("room079", ROOM1, room1Amount[0] + (int)(floor(0.15 * room1Amount[1])), minPos, maxPos);
+  setRoom("room106", ROOM1, room1Amount[0] + (int)(floor(0.3 * room1Amount[1])), minPos, maxPos);
+  setRoom("008", ROOM1, room1Amount[0] + (int)(floor(0.4 * room1Amount[1])), minPos, maxPos);
+  setRoom("room035", ROOM1, room1Amount[0] + (int)(floor(0.5 * room1Amount[1])), minPos, maxPos);
+  setRoom("coffin", ROOM1, room1Amount[0] + (int)(floor(0.7 * room1Amount[1])), minPos, maxPos);
+
+  minPos = room2Amount[0];
+  maxPos = minPos + room2Amount[1] - 1;
+
+  mapRoom[ROOM2][minPos + (int)(floor(0.1 * room2Amount[1]))] = "room2nuke";
+  setRoom("room2tunnel", ROOM2, minPos + (int)(floor(0.25 * room2Amount[1])), minPos, maxPos);
+  setRoom("room049", ROOM2, minPos + (int)(floor(0.4 * room2Amount[1])), minPos, maxPos);
+  setRoom("room2shaft", ROOM2, minPos + (int)(floor(0.6 * room2Amount[1])), minPos, maxPos);
+  setRoom("testroom", ROOM2, minPos + (int)(floor(0.7 * room2Amount[1])), minPos, maxPos);
+  setRoom("room2servers", ROOM2, minPos + (int)(floor(0.9 * room2Amount[1])), minPos, maxPos);
+
+  mapRoom[ROOM3][room3Amount[0] + (int)floor(0.3 * room3Amount[1])] = "room513";
+  mapRoom[ROOM3][room3Amount[0] + (int)floor(0.6 * room3Amount[1])] = "room966";
+
+  mapRoom[ROOM2C][room2cAmount[0] + (int)floor(0.5 * room2cAmount[1])] = "room2cpit";
+
+  // zone 3
+  mapRoom[ROOM1][room1Amount[0] + room1Amount[1] + room1Amount[2] - 2] = "exit1";
+  mapRoom[ROOM1][room1Amount[0] + room1Amount[1] + room1Amount[2] - 1] = "gateaentrance";
+  mapRoom[ROOM1][room1Amount[0] + room1Amount[1]] = "room1lifts";
+
+  minPos = room2Amount[0] + room2Amount[1];
+  maxPos = minPos + room2Amount[2] - 1;
+
+  mapRoom[ROOM2][minPos + (int)(floor(0.1 * room2Amount[2]))] = "room2poffices";
+  setRoom("room2cafeteria", ROOM2, minPos + (int)(floor(0.2 * room2Amount[2])), minPos, maxPos);
+  setRoom("room2sroom", ROOM2, minPos + (int)(floor(0.3 * room2Amount[2])), minPos, maxPos);
+  setRoom("room2servers2", ROOM2, minPos + (int)(floor(0.4 * room2Amount[2])), minPos, maxPos);
+  setRoom("room2offices", ROOM2, minPos + (int)(floor(0.45 * room2Amount[2])), minPos, maxPos);
+  setRoom("room2offices4", ROOM2, minPos + (int)(floor(0.5 * room2Amount[2])), minPos, maxPos);
+  setRoom("room860", ROOM2, minPos + (int)(floor(0.6 * room2Amount[2])), minPos, maxPos);
+  setRoom("medibay", ROOM2, minPos + (int)(floor(0.7 * room2Amount[2])), minPos, maxPos);
+  setRoom("room2poffices2", ROOM2, minPos + (int)(floor(0.8 * room2Amount[2])), minPos, maxPos);
+  setRoom("room2offices2", ROOM2, minPos + (int)(floor(0.9 * room2Amount[2])), minPos, maxPos);
+
+  int r2c = room2cAmount[0] + room2cAmount[1];
+  mapRoom[ROOM2C][r2c] = "room2ccont";
+  mapRoom[ROOM2C][r2c + 1] = "lockroom2";
+
+  int r3 = room3Amount[0] + room3Amount[1];
+  mapRoom[ROOM3][r3 + (int)(floor(0.3 * room3Amount[2]))] = "room3servers";
+  mapRoom[ROOM3][r3 + (int)(floor(0.7 * room3Amount[2]))] = "room3servers2";
+  mapRoom[ROOM3][r3 + (int)(floor(0.5 * room3Amount[2]))] = "room3offices";
 }
+
+void Map::generateMaze(){
+	int x = Map::MAP_WIDTH/2;
+	int y = Map::MAP_HEIGHT-2;
+
+	mapTemp[x][Map::MAP_HEIGHT - 1] = 1; // start room
+
+	int w,h,t = 0; // width height temp
+	do {
+		// horizontal line
+		w = bbRand(10, 15);
+		if(x > Map::MAP_WIDTH * 0.6) w = -w;
+		else if(x > Map::MAP_WIDTH)  x = x-w/2;
+
+		// hallway can't go outside array
+		if(x + w > Map::MAP_WIDTH - 3) w = Map::MAP_WIDTH - 3 - x;
+		else if(x + w < 2) w = -x + 2;
+
+		x = std::min(x, x + w);
+		w = abs(w);
+		for(int i = x; i <= x + w; i++)
+			mapTemp[i][y] = 1;
+		
+		// vertical connections
+		h = bbRand(3, 4);
+		if(y-h < 1) h = y-1;
+
+		int yHalls = bbRand(4, 5);
+		if(getZone(y-h) != getZone(y-h+1)) h--;
+
+		for(int i = 1; i <= yHalls; i++){
+			int x2 = std::max(2, std::min(Map::MAP_WIDTH - 2, bbRand(x,x+w-1)));
+			while(mapTemp[x2-1][y-1] != 0 || mapTemp[x2][y-1] != 0 ||
+					mapTemp[x2+1][y-1] != 0) x2++;
+			
+			if(x2 < x+w){
+				int tH; // temp height
+				if(i == 1){
+					// at least one connection to next horiz line
+					tH = h;
+					if(bbRand(1,2) == 1) x2 = x;
+					else x2 = x + w;
+				} else tH = bbRand(1,h);
+
+				for(int y2 = y - tH; y2<=y; y2++){
+					if(getZone(y2) != getZone(y2+1)) mapTemp[x2][y2] = 255; // room leading to other
+					else mapTemp[x2][y2] = 1;
+				}
+
+				if(tH == h) t = x2;
+			}
+		}
+		x = t;
+		y = y-h;
+	} while(y >= 2);
+} 
+
 
 void Map::setRoom(std::string roomName, int type, int pos, int min, int max){
   bool looped = false;
@@ -360,9 +577,5 @@ void Map::setRoom(std::string roomName, int type, int pos, int min, int max){
       }
     }
   }
-  if (canPlace) {
-    printf("could place     %s\n", roomName.c_str());
-    mapRoom[type][pos] = roomName;
-  } else
-    printf("couldn't place %s\n", roomName.c_str());
+  if (canPlace) mapRoom[type][pos] = roomName;
 }
