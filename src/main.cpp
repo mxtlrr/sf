@@ -4,9 +4,6 @@
 #include "util.hpp"
 #include "backend/map.hpp"
 
-int main(void){
-  Map::createMap(648);
-  removeDuplicates();
-  
+int main(void){  
   return 0;
 }

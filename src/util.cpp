@@ -1,7 +1,6 @@
 #include "util.hpp"
 
 void removeDuplicates(){
-  printf("vector size -> %ld\n", Map::rooms.size());
   std::vector<double> ex;
   int z = 0;
   for(auto& v : Map::rooms){
@@ -17,5 +16,4 @@ void removeDuplicates(){
     }
     z++;
   }
-  printf("new size of vector (duplicates removed): %ld\n", Map::rooms.size());
 }
