@@ -1,6 +1,6 @@
 CC := g++
 
-CFLAGS  := -Wall -Wextra -Os -g -Iinclude/ $(LDFLAGS)
+CFLAGS  := -Wall -Wextra -Os -g -std=c++20 -Iinclude/ $(LDFLAGS)
 LDFLAGS := -lm
 
 TARGET := bin/sf

@@ -11,8 +11,6 @@ class RoomTemplate {
     int id;
     int large;
     int useLightCones;
-    float minX, minY, minZ;
-    float maxX, maxY, maxZ;
   
   public:
     std::string name;
@@ -23,11 +21,15 @@ class RoomTemplate {
     bool disableOverlapCheck;
 };
 
+
+// TODO: findExetents, calcExtents()
 class Room {
   public:
     int zone;
     double x, z;
     int angle, shape;
+    float minX, minY, minZ;
+    float maxX, maxY, maxZ;
 
     // template?
     RoomTemplate rt;
