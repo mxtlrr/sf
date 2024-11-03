@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 
+#include "backend/meshextents.hpp"
+#include "backend/extentsDB.hpp"
 
 // Lotta this stuff I don't need tbh
 class RoomTemplate {
@@ -19,6 +21,7 @@ class RoomTemplate {
     int commonness;
     bool disableDecals;
     bool disableOverlapCheck;
+    MeshExtents extents;
 };
 
 
@@ -30,9 +33,10 @@ class Room {
     int angle, shape;
     float minX, minY, minZ;
     float maxX, maxY, maxZ;
+    int extentsAngle;
 
-    // template?
     RoomTemplate rt;
+    MeshExtents extents;
 
     static Room createRoom(int zone, int shape, int x, int z, std::string name);
 
@@ -47,6 +51,10 @@ class Room {
     bool operator==(const Room& other) const {
       return x == other.x && z == other.z;
     }
+
+
+    void calcExtents();
+
 };
 
 

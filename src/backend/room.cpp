@@ -35,3 +35,38 @@ bool existRooms(std::vector<Room> r, Room n){
   }
   return true;  // No match:)
 }
+
+void Room::calcExtents(){
+  if(rt.disableOverlapCheck) return;
+
+  extentsAngle = angle;
+  extents = rt.extents.copyTransform((double)(8/2048), angle);
+
+  if(x>0 && z>0){
+    RoomExtentsDB::Bounds b = RoomExtentsDB::findExtents(rt.name,
+          angle, (int)(x/8), (int)(z/8));
+    minX = b.minX;
+    maxX = b.maxX;
+    minZ = b.minZ;
+    maxZ = b.maxZ;
+  } else {
+    minX = extents.minX + 0.05 + x;
+    minZ = extents.minZ + 0.05 + z;
+    maxX = extents.maxX - 0.05 + x;
+    maxZ = extents.maxZ - 0.05 + z;
+
+    // funny bug frmo the game itself. lol
+    if (minX > maxX) {
+      double a = minX;
+      minX = maxX;
+      maxX = a;
+    }
+    if (minZ > maxZ) {
+      double a = minZ;
+      minZ = maxZ;
+      maxZ = a;
+    }
+    printf("Room %s extents: %f,%f,%f / %f,%f,%f / %s deg\n",
+        rt.name.c_str(), minX, minY, minZ, maxX, maxY, maxZ);
+  }
+}
